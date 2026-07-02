@@ -1,0 +1,870 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Earth Science 2: Plates, Faults, and Earthquakes</title>
+  <style>
+    :root {
+      --ink: #15202b;
+      --muted: #5a6874;
+      --paper: #f7f6f1;
+      --panel: #ffffff;
+      --line: #d9ded6;
+      --green: #2e7d5b;
+      --red: #c24a39;
+      --yellow: #f0b544;
+      --blue: #28769f;
+      --stone: #4b5560;
+      --shadow: 0 14px 35px rgba(32, 43, 52, .12);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        linear-gradient(180deg, rgba(247, 246, 241, .86), rgba(247, 246, 241, .96)),
+        url("data:image/svg+xml,%3Csvg width='1600' height='900' viewBox='0 0 1600 900' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='1600' height='900' fill='%238cb7bd'/%3E%3Cpath d='M0 590 C220 480 350 570 520 460 C740 320 900 450 1090 310 C1270 180 1450 270 1600 170 L1600 900 L0 900 Z' fill='%23b66f45'/%3E%3Cpath d='M0 685 C250 590 390 655 610 540 C850 415 990 535 1210 410 C1380 315 1490 370 1600 300 L1600 900 L0 900 Z' fill='%23575b59' opacity='.88'/%3E%3Cpath d='M0 760 C245 700 420 735 640 660 C900 570 1060 650 1280 560 C1435 500 1530 525 1600 475 L1600 900 L0 900 Z' fill='%232d3438'/%3E%3Cpath d='M220 650 l145 -220 l32 198 M1090 520 l130 -210 l52 194' stroke='%23f3efe3' stroke-width='10' fill='none' opacity='.7'/%3E%3C/svg%3E") center / cover fixed;
+    }
+
+    button, input, select { font: inherit; }
+
+    .shell {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 22px 0 36px;
+    }
+
+    header {
+      min-height: 34vh;
+      display: grid;
+      align-content: end;
+      gap: 16px;
+      padding: 28px 0 22px;
+    }
+
+    .eyebrow {
+      width: fit-content;
+      padding: 7px 10px;
+      background: rgba(255,255,255,.82);
+      border: 1px solid rgba(21,32,43,.12);
+      border-radius: 6px;
+      color: #23483c;
+      font-size: .82rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      max-width: 780px;
+      margin: 0;
+      font-size: clamp(2.1rem, 5vw, 4.7rem);
+      line-height: .96;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      max-width: 760px;
+      margin: 0;
+      color: #2e3b45;
+      font-size: clamp(1rem, 2vw, 1.24rem);
+      line-height: 1.55;
+      font-weight: 540;
+    }
+
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 10px 0;
+      background: rgba(247,246,241,.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(21,32,43,.08);
+    }
+
+    .tab {
+      min-width: max-content;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--stone);
+      border-radius: 6px;
+      padding: 10px 13px;
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .tab[aria-selected="true"] {
+      color: #fff;
+      border-color: var(--green);
+      background: var(--green);
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(290px, .75fr);
+      gap: 18px;
+      align-items: start;
+      margin-top: 14px;
+    }
+
+    .stage, .side, .card, .modal {
+      background: rgba(255,255,255,.94);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .stage { min-height: 650px; overflow: hidden; }
+
+    .panel { display: none; padding: 18px; }
+    .panel.active { display: block; }
+
+    h2, h3 { margin: 0; letter-spacing: 0; }
+    h2 { font-size: clamp(1.45rem, 3vw, 2.15rem); }
+    h3 { font-size: 1.05rem; }
+    p { line-height: 1.55; }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .card {
+      box-shadow: none;
+      padding: 14px;
+      min-height: 150px;
+    }
+
+    .tag {
+      display: inline-block;
+      margin-bottom: 10px;
+      padding: 5px 8px;
+      border-radius: 5px;
+      color: #fff;
+      background: var(--blue);
+      font-size: .78rem;
+      font-weight: 900;
+    }
+
+    .process {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfaf6;
+    }
+
+    .num {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      color: #fff;
+      border-radius: 50%;
+      background: var(--stone);
+      font-weight: 900;
+    }
+
+    .sim-wrap {
+      display: grid;
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    canvas {
+      width: 100%;
+      height: auto;
+      min-height: 330px;
+      border: 1px solid #cdd7cf;
+      border-radius: 8px;
+      background: #dce9ec;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .control {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfaf6;
+    }
+
+    .seg {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .seg button, .small-btn, .choice, .action {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 6px;
+      padding: 9px 10px;
+      cursor: pointer;
+      font-weight: 800;
+      color: var(--ink);
+    }
+
+    .seg button.active, .choice.selected {
+      border-color: var(--blue);
+      background: #e4f1f6;
+    }
+
+    input[type="range"] { width: 100%; accent-color: var(--green); }
+
+    .meter {
+      height: 16px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #e4e7e3;
+      border: 1px solid var(--line);
+      margin-top: 8px;
+    }
+
+    .meter > span {
+      display: block;
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--green), var(--yellow), var(--red));
+      transition: width .35s ease;
+    }
+
+    .fault-lab {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .dropzone, .tiles {
+      min-height: 310px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfaf6;
+    }
+
+    .tiles {
+      display: grid;
+      gap: 10px;
+      align-content: start;
+    }
+
+    .tile {
+      padding: 11px;
+      border: 1px solid #cbd4cc;
+      border-left: 6px solid var(--blue);
+      border-radius: 6px;
+      background: #fff;
+      cursor: grab;
+      font-weight: 800;
+    }
+
+    .tile.selected {
+      outline: 3px solid rgba(40, 118, 159, .25);
+      border-color: var(--blue);
+      background: #e4f1f6;
+    }
+
+    .slot {
+      min-height: 62px;
+      display: grid;
+      align-items: center;
+      margin-top: 10px;
+      padding: 10px;
+      border: 2px dashed #b8c2bb;
+      border-radius: 8px;
+      color: var(--muted);
+      background: #fff;
+    }
+
+    .slot.filled { border-style: solid; color: var(--ink); }
+
+    .quiz {
+      display: grid;
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .question {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfaf6;
+    }
+
+    .choices {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .choice {
+      text-align: left;
+      font-weight: 700;
+    }
+
+    .choice.correct { border-color: var(--green); background: #e8f5ee; }
+    .choice.wrong { border-color: var(--red); background: #fae9e6; }
+
+    .action {
+      width: fit-content;
+      color: #fff;
+      border-color: var(--green);
+      background: var(--green);
+    }
+
+    .side {
+      position: sticky;
+      top: 64px;
+      padding: 16px;
+      display: grid;
+      gap: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .goal-list {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .goal-list li {
+      display: grid;
+      grid-template-columns: 24px 1fr;
+      gap: 8px;
+      align-items: start;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .check {
+      display: grid;
+      place-items: center;
+      width: 22px;
+      height: 22px;
+      color: #fff;
+      border-radius: 50%;
+      background: #9ba6a0;
+      font-size: .78rem;
+      font-weight: 900;
+    }
+
+    .done .check { background: var(--green); }
+    .done { color: var(--ink) !important; }
+
+    .scorebox {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .score {
+      padding: 12px;
+      border-radius: 8px;
+      background: #eef4f0;
+      border: 1px solid #d6e2da;
+    }
+
+    .score strong {
+      display: block;
+      font-size: 1.6rem;
+    }
+
+    .note {
+      color: var(--muted);
+      font-size: .92rem;
+      line-height: 1.45;
+    }
+
+    .feedback {
+      min-height: 32px;
+      color: #214234;
+      font-weight: 800;
+    }
+
+    .shake {
+      animation: shake .38s linear;
+    }
+
+    @keyframes shake {
+      20%, 60% { transform: translateX(-5px); }
+      40%, 80% { transform: translateX(5px); }
+    }
+
+    @media (max-width: 880px) {
+      .shell { width: min(100% - 20px, 680px); }
+      header { min-height: 28vh; }
+      main, .fault-lab, .mini-grid, .controls { grid-template-columns: 1fr; }
+      .side { position: static; }
+      .stage { min-height: auto; }
+      canvas { min-height: 260px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div class="eyebrow">Earth Science 2 | Strengthened SHS Alignment</div>
+      <h1>Plates Push. Rocks Store Stress. Faults Break. Earthquakes Begin.</h1>
+      <p class="lead">A self-learning experience for describing how tectonic plate movement provides the stress that shifts and breaks rocks beneath Earth’s surface, forming faults and causing earthquakes.</p>
+    </header>
+
+    <nav class="toolbar" aria-label="Learning sections">
+      <button class="tab" aria-selected="true" data-tab="lecture">Micro Lecture</button>
+      <button class="tab" aria-selected="false" data-tab="simulation">Stress Lab</button>
+      <button class="tab" aria-selected="false" data-tab="faults">Fault Builder</button>
+      <button class="tab" aria-selected="false" data-tab="challenge">Quake Challenge</button>
+    </nav>
+
+    <main>
+      <section class="stage" aria-live="polite">
+        <article class="panel active" id="lecture">
+          <h2>One Chain of Cause and Effect</h2>
+          <p>Earth’s lithosphere is broken into moving plates. Their movement is slow, but it can squeeze, pull, or shear rocks. When stress becomes greater than the rock’s strength, the rock breaks or slips along a fault. The sudden release of stored energy sends seismic waves outward as an earthquake.</p>
+          <div class="mini-grid">
+            <div class="card">
+              <span class="tag">1. Plate Motion</span>
+              <h3>Stress Starts</h3>
+              <p>Convergent, divergent, and transform boundaries create different kinds of stress underground.</p>
+            </div>
+            <div class="card">
+              <span class="tag">2. Rock Response</span>
+              <h3>Rocks Bend, Then Break</h3>
+              <p>Rocks can deform slowly, but stored elastic energy rises when movement is blocked.</p>
+            </div>
+            <div class="card">
+              <span class="tag">3. Earthquake</span>
+              <h3>Sudden Slip</h3>
+              <p>When the fault slips, energy travels as seismic waves from the focus toward surrounding areas.</p>
+            </div>
+          </div>
+          <div class="process">
+            <div class="step"><div class="num">A</div><p><strong>Compressional stress</strong> squeezes rock and commonly forms reverse faults.</p></div>
+            <div class="step"><div class="num">B</div><p><strong>Tensional stress</strong> pulls rock apart and commonly forms normal faults.</p></div>
+            <div class="step"><div class="num">C</div><p><strong>Shear stress</strong> moves rock sideways and commonly forms strike-slip faults.</p></div>
+          </div>
+        </article>
+
+        <article class="panel" id="simulation">
+          <h2>Stress Lab</h2>
+          <p>Change the boundary and plate speed. Watch stress build until the locked rocks suddenly slip.</p>
+          <div class="sim-wrap">
+            <canvas id="earthCanvas" width="920" height="470" aria-label="Plate movement and earthquake simulation"></canvas>
+            <div class="controls">
+              <div class="control">
+                <h3>Boundary</h3>
+                <div class="seg" role="group" aria-label="Boundary type">
+                  <button class="boundary active" data-boundary="convergent">Push</button>
+                  <button class="boundary" data-boundary="divergent">Pull</button>
+                  <button class="boundary" data-boundary="transform">Slide</button>
+                </div>
+              </div>
+              <div class="control">
+                <h3>Plate Speed</h3>
+                <input id="speed" type="range" min="1" max="8" value="4">
+                <p class="note" id="speedText">Moderate movement</p>
+              </div>
+              <div class="control">
+                <h3>Stored Stress</h3>
+                <div class="meter" aria-label="Stress meter"><span id="stressFill"></span></div>
+                <p class="note" id="stressText">Stress is building.</p>
+              </div>
+            </div>
+            <button class="action" id="releaseBtn">Force Sudden Slip</button>
+          </div>
+        </article>
+
+        <article class="panel" id="faults">
+          <h2>Fault Builder</h2>
+          <p>Match each stress to the fault it usually produces. This builds the vocabulary needed to explain earthquakes clearly.</p>
+          <div class="fault-lab">
+            <div class="tiles" aria-label="Draggable fault cards">
+              <div class="tile" draggable="true" data-answer="normal">Normal fault: hanging wall moves down</div>
+              <div class="tile" draggable="true" data-answer="reverse">Reverse fault: hanging wall moves up</div>
+              <div class="tile" draggable="true" data-answer="strike">Strike-slip fault: blocks move sideways</div>
+            </div>
+            <div class="dropzone">
+              <h3>Stress Match</h3>
+              <div class="slot" data-slot="reverse">Compressional stress</div>
+              <div class="slot" data-slot="normal">Tensional stress</div>
+              <div class="slot" data-slot="strike">Shear stress</div>
+              <p class="feedback" id="faultFeedback"></p>
+              <button class="action" id="checkFaults">Check Matches</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel" id="challenge">
+          <h2>Quake Challenge</h2>
+          <p>Earn mastery by choosing the explanation that best follows the plate-stress-fault-earthquake chain.</p>
+          <div class="quiz" id="quiz"></div>
+          <button class="action" id="resetQuiz">Try Again</button>
+        </article>
+      </section>
+
+      <aside class="side">
+        <div>
+          <h3>Learning Targets</h3>
+          <ul class="goal-list">
+            <li class="done"><span class="check">✓</span><span>Connect plate movement to stress beneath Earth’s surface.</span></li>
+            <li id="goalSim"><span class="check">✓</span><span>Use a simulation to explain stress build-up and sudden slip.</span></li>
+            <li id="goalFault"><span class="check">✓</span><span>Match stress types with common fault types.</span></li>
+            <li id="goalQuiz"><span class="check">✓</span><span>Describe how earthquakes result from sudden rock movement.</span></li>
+          </ul>
+        </div>
+        <div class="scorebox">
+          <div class="score"><span>Stars</span><strong id="stars">0</strong></div>
+          <div class="score"><span>Mastery</span><strong id="mastery">25%</strong></div>
+        </div>
+        <div>
+          <h3>DepEd Alignment</h3>
+          <p class="note">Built for scientific literacy, hazard awareness, and evidence-based explanation: learners observe, model, check ideas, and apply the competency in concise steps.</p>
+        </div>
+        <p class="feedback" id="globalFeedback">Begin with the micro lecture, then open the lab when ready.</p>
+      </aside>
+    </main>
+  </div>
+
+  <script>
+    const tabs = [...document.querySelectorAll(".tab")];
+    const panels = [...document.querySelectorAll(".panel")];
+    const starsEl = document.querySelector("#stars");
+    const masteryEl = document.querySelector("#mastery");
+    const globalFeedback = document.querySelector("#globalFeedback");
+    const progress = { lecture: true, simulation: false, faults: false, challenge: false };
+    let stars = 0;
+
+    function updateProgress() {
+      document.querySelector("#goalSim").classList.toggle("done", progress.simulation);
+      document.querySelector("#goalFault").classList.toggle("done", progress.faults);
+      document.querySelector("#goalQuiz").classList.toggle("done", progress.challenge);
+      const completed = Object.values(progress).filter(Boolean).length;
+      masteryEl.textContent = `${Math.round((completed / 4) * 100)}%`;
+      starsEl.textContent = stars;
+    }
+
+    function award(message) {
+      stars += 1;
+      globalFeedback.textContent = message;
+      updateProgress();
+    }
+
+    tabs.forEach(tab => {
+      tab.addEventListener("click", () => {
+        tabs.forEach(t => t.setAttribute("aria-selected", String(t === tab)));
+        panels.forEach(panel => panel.classList.toggle("active", panel.id === tab.dataset.tab));
+        if (tab.dataset.tab === "simulation") startAnimation();
+      });
+    });
+
+    const canvas = document.querySelector("#earthCanvas");
+    const ctx = canvas.getContext("2d");
+    const stressFill = document.querySelector("#stressFill");
+    const stressText = document.querySelector("#stressText");
+    const speed = document.querySelector("#speed");
+    const speedText = document.querySelector("#speedText");
+    let boundary = "convergent";
+    let stress = 18;
+    let quake = 0;
+    let tick = 0;
+    let animationStarted = false;
+
+    document.querySelectorAll(".boundary").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".boundary").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        boundary = btn.dataset.boundary;
+        stress = Math.max(12, stress - 8);
+        startAnimation();
+      });
+    });
+
+    speed.addEventListener("input", () => {
+      const labels = ["Very slow", "Slow", "Slow", "Moderate", "Moderate", "Fast", "Fast", "Very fast"];
+      speedText.textContent = `${labels[Number(speed.value) - 1]} movement`;
+    });
+
+    document.querySelector("#releaseBtn").addEventListener("click", () => {
+      quake = 34;
+      stress = 8;
+      if (!progress.simulation) {
+        progress.simulation = true;
+        award("Nice. You triggered a sudden slip and saw stress release as seismic waves.");
+      }
+      startAnimation();
+    });
+
+    function arrow(x, y, dx, dy, color) {
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = 8;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + dx, y + dy);
+      ctx.stroke();
+      const a = Math.atan2(dy, dx);
+      ctx.beginPath();
+      ctx.moveTo(x + dx, y + dy);
+      ctx.lineTo(x + dx - 18 * Math.cos(a - .55), y + dy - 18 * Math.sin(a - .55));
+      ctx.lineTo(x + dx - 18 * Math.cos(a + .55), y + dy - 18 * Math.sin(a + .55));
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    function drawFaultLine() {
+      ctx.strokeStyle = "#111827";
+      ctx.lineWidth = 5;
+      ctx.setLineDash([14, 9]);
+      ctx.beginPath();
+      if (boundary === "transform") {
+        ctx.moveTo(460, 170);
+        ctx.lineTo(460, 408);
+      } else {
+        ctx.moveTo(380, 165);
+        ctx.lineTo(535, 410);
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    function startAnimation() {
+      if (animationStarted) return;
+      animationStarted = true;
+      draw();
+    }
+
+    function draw() {
+      tick += 1;
+      const speedVal = Number(speed.value);
+      if (quake > 0) {
+        quake -= 1;
+      } else {
+        stress += speedVal * .16;
+        if (stress >= 100) {
+          quake = 45;
+          stress = 10;
+          if (!progress.simulation) award("The locked rocks slipped after stress exceeded rock strength.");
+          progress.simulation = true;
+          updateProgress();
+        }
+      }
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#dce9ec";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#7ab3bf";
+      ctx.fillRect(0, 0, canvas.width, 112);
+      ctx.fillStyle = "#ece2c6";
+      ctx.fillRect(0, 112, canvas.width, 45);
+
+      const wobble = quake > 0 ? Math.sin(tick * 1.7) * 9 : 0;
+      const offset = boundary === "convergent" ? stress * .18 : boundary === "divergent" ? -stress * .12 : 0;
+      const slide = boundary === "transform" ? stress * .15 : 0;
+
+      ctx.fillStyle = "#a86b45";
+      ctx.beginPath();
+      ctx.moveTo(0, 158 + wobble + slide * .1);
+      ctx.lineTo(450 + offset, 155 + wobble + slide);
+      ctx.lineTo(450 + offset, 430 + wobble + slide);
+      ctx.lineTo(0, 430 + wobble + slide * .1);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = "#755646";
+      ctx.beginPath();
+      ctx.moveTo(920, 158 - wobble - slide * .1);
+      ctx.lineTo(470 - offset, 155 - wobble - slide);
+      ctx.lineTo(470 - offset, 430 - wobble - slide);
+      ctx.lineTo(920, 430 - wobble - slide * .1);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = "rgba(255,255,255,.42)";
+      for (let y = 205; y < 390; y += 54) {
+        ctx.fillRect(0, y + wobble, canvas.width, 8);
+      }
+
+      drawFaultLine();
+
+      if (boundary === "convergent") {
+        arrow(250, 90, 95, 0, "#c24a39");
+        arrow(670, 90, -95, 0, "#c24a39");
+      } else if (boundary === "divergent") {
+        arrow(380, 90, -95, 0, "#28769f");
+        arrow(540, 90, 95, 0, "#28769f");
+      } else {
+        arrow(410, 90, 0, -55, "#2e7d5b");
+        arrow(510, 48, 0, 55, "#2e7d5b");
+      }
+
+      if (quake > 0) {
+        ctx.strokeStyle = "rgba(194, 74, 57, .85)";
+        ctx.lineWidth = 4;
+        for (let r = 28; r < 190; r += 38) {
+          ctx.beginPath();
+          ctx.arc(462, 285, r + (45 - quake) * 2, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+        ctx.fillStyle = "#c24a39";
+        ctx.font = "900 26px Inter, sans-serif";
+        ctx.fillText("Sudden slip: earthquake waves travel outward", 228, 455);
+      }
+
+      stressFill.style.width = `${Math.min(100, stress)}%`;
+      stressText.textContent = stress > 78 ? "Rock strength is close to failure." : stress > 45 ? "Stress is stored in bent rock." : "Stress is building.";
+      requestAnimationFrame(draw);
+    }
+    startAnimation();
+
+    let dragged = null;
+    let selectedTile = null;
+    document.querySelectorAll(".tile").forEach(tile => {
+      tile.addEventListener("dragstart", () => { dragged = tile; });
+      tile.addEventListener("click", () => {
+        document.querySelectorAll(".tile").forEach(t => t.classList.remove("selected"));
+        selectedTile = tile;
+        tile.classList.add("selected");
+        globalFeedback.textContent = "Now tap the matching stress slot.";
+      });
+    });
+
+    document.querySelectorAll(".slot").forEach(slot => {
+      slot.addEventListener("dragover", e => e.preventDefault());
+      slot.addEventListener("drop", () => {
+        if (!dragged) return;
+        slot.textContent = "";
+        slot.appendChild(dragged);
+        dragged.classList.remove("selected");
+        slot.classList.add("filled");
+      });
+      slot.addEventListener("click", () => {
+        if (!selectedTile) return;
+        slot.textContent = "";
+        slot.appendChild(selectedTile);
+        selectedTile.classList.remove("selected");
+        selectedTile = null;
+        slot.classList.add("filled");
+      });
+    });
+
+    document.querySelector("#checkFaults").addEventListener("click", () => {
+      const slots = [...document.querySelectorAll(".slot")];
+      const correct = slots.every(slot => slot.querySelector(".tile")?.dataset.answer === slot.dataset.slot);
+      const feedback = document.querySelector("#faultFeedback");
+      if (correct) {
+        feedback.textContent = "Correct: push, pull, and slide stresses create different fault motions.";
+        if (!progress.faults) {
+          progress.faults = true;
+          award("Fault Builder complete. Your stress-to-fault matches are solid.");
+        } else {
+          globalFeedback.textContent = "Fault Builder is already complete. Good match set.";
+        }
+      } else {
+        feedback.textContent = "Try again. Think: squeeze = reverse, pull = normal, sideways = strike-slip.";
+        document.querySelector(".dropzone").classList.add("shake");
+        setTimeout(() => document.querySelector(".dropzone").classList.remove("shake"), 420);
+      }
+    });
+
+    const quizData = [
+      {
+        q: "Which sequence best explains why an earthquake can happen?",
+        a: "Plate movement creates stress, rocks break or slip along a fault, and seismic waves are released.",
+        choices: [
+          "Heat melts the crust, magma pushes all rocks upward, and wind creates waves.",
+          "Plate movement creates stress, rocks break or slip along a fault, and seismic waves are released.",
+          "Ocean tides pull mountains apart and make the crust bounce."
+        ]
+      },
+      {
+        q: "A transform boundary mainly produces what kind of stress?",
+        a: "Shear stress",
+        choices: ["Compressional stress", "Tensional stress", "Shear stress"]
+      },
+      {
+        q: "Why do rocks sometimes move suddenly instead of smoothly?",
+        a: "Friction locks them until stored stress exceeds rock strength.",
+        choices: [
+          "Friction locks them until stored stress exceeds rock strength.",
+          "The crust stops receiving gravity for a moment.",
+          "Seismic waves pull plates before any stress forms."
+        ]
+      }
+    ];
+
+    function buildQuiz() {
+      const quiz = document.querySelector("#quiz");
+      quiz.innerHTML = "";
+      quizData.forEach((item, index) => {
+        const box = document.createElement("div");
+        box.className = "question";
+        box.innerHTML = `<h3>${index + 1}. ${item.q}</h3>`;
+        const choices = document.createElement("div");
+        choices.className = "choices";
+        item.choices.forEach(choice => {
+          const btn = document.createElement("button");
+          btn.className = "choice";
+          btn.textContent = choice;
+          btn.addEventListener("click", () => {
+            [...choices.children].forEach(c => c.disabled = true);
+            if (choice === item.a) {
+              btn.classList.add("correct");
+              stars += 1;
+            } else {
+              btn.classList.add("wrong");
+              [...choices.children].find(c => c.textContent === item.a).classList.add("correct");
+            }
+            const answered = [...document.querySelectorAll(".question")].every(q => [...q.querySelectorAll(".choice")].some(c => c.disabled));
+            if (answered) {
+              progress.challenge = true;
+              globalFeedback.textContent = "Challenge submitted. Review any highlighted answer, then explain the chain in your own words.";
+            }
+            updateProgress();
+          });
+          choices.appendChild(btn);
+        });
+        box.appendChild(choices);
+        quiz.appendChild(box);
+      });
+    }
+
+    document.querySelector("#resetQuiz").addEventListener("click", () => {
+      progress.challenge = false;
+      buildQuiz();
+      updateProgress();
+      globalFeedback.textContent = "Quiz reset. Aim for a clean three-star run.";
+    });
+
+    buildQuiz();
+    updateProgress();
+  </script>
+</body>
+</html>
